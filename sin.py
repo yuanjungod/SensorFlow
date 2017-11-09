@@ -8,8 +8,8 @@ import matplotlib.pyplot as plt
 learn = tf.contrib.learn
 
 
-HIDDEN_SIZE = 30
-NUM_LAYERS = 2
+HIDDEN_SIZE = 40
+NUM_LAYERS = 3
 
 TIMESTEPS = 10
 TRAINING_STEPS = 3000
@@ -25,6 +25,8 @@ def generate_data(seq):
     y = []
 
     for i in range(len(seq) - TIMESTEPS - 1):
+        # print([seq[i: i + TIMESTEPS]])
+        # exit()
         X.append([seq[i: i + TIMESTEPS]])
         y.append([seq[i + TIMESTEPS]])
     return np.array(X, dtype=np.float32), np.array(y, dtype=np.float32)
@@ -61,9 +63,15 @@ regressor = SKCompat(learn.Estimator(model_fn=lstm_model, model_dir="Models/mode
 # 生成数据。
 test_start = TRAINING_EXAMPLES * SAMPLE_GAP
 test_end = (TRAINING_EXAMPLES + TESTING_EXAMPLES) * SAMPLE_GAP
-train_X, train_y = generate_data(np.sqrt(np.linspace(
+train_X, train_y = generate_data(np.sin(np.linspace(
     0, test_start, TRAINING_EXAMPLES, dtype=np.float32)))
-test_X, test_y = generate_data(np.sqrt(np.linspace(
+# print(np.power(np.linspace(
+#     0, test_start, TRAINING_EXAMPLES, dtype=np.float32), 1.0/3))
+# print(test_start)
+print(train_X[: 30])
+print(train_y[: 30])
+# exit()
+test_X, test_y = generate_data(np.sin(np.linspace(
     test_start, test_end, TESTING_EXAMPLES, dtype=np.float32)))
 
 # 拟合数据。

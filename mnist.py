@@ -33,6 +33,12 @@ def load_data(path='mnist.npz'):
 # 加载数据
 (X_train, y_train), (X_test, y_test) = load_data()
 
+print "X_train shape = ", X_train.shape
+print y_train[0]
+
+# print X_train[0]
+# exit()
+
 
 def transform_data(X_train, y_train, X_test, y_test):
     X_train = X_train.reshape(X_train.shape[0], 28, 28, 1).astype('float32')
@@ -43,9 +49,9 @@ def transform_data(X_train, y_train, X_test, y_test):
     return X_train, y_train, X_test, y_test, num_classes
 
 
-num_classes = np_utils.to_categorical(y_test).shape[1]
-y_train = np_utils.to_categorical(y_train)
-y_test = np_utils.to_categorical(y_test)
+# num_classes = np_utils.to_categorical(y_test).shape[1]
+# y_train = np_utils.to_categorical(y_train)
+# y_test = np_utils.to_categorical(y_test)
 
 
 # 简单的CNN模型
@@ -53,16 +59,20 @@ def baseline_model():
     # create model
     model = Sequential()
     # 卷积层
-    model.add(Conv2D(32, (3, 3), padding='valid', input_shape=(28, 28, 1), activation='relu'))  # 池化层
+    model.add(Conv2D(32, (3, 3), padding='valid', input_shape=(28, 28, 1), activation='sigmoid'))  # 池化层
+    # model.add(Conv2D(32, (3, 3), padding='valid', input_shape=(28, 28), activation='relu'))  # 池化层
+    model.add(MaxPooling2D(pool_size=(2, 2)))
+    # 卷积层
+    model.add(Conv2D(20, (3, 3), padding='valid', input_shape=(28, 28, 1), activation='tanh'))  # 池化层
     # model.add(Conv2D(32, (3, 3), padding='valid', input_shape=(28, 28), activation='relu'))  # 池化层
     model.add(MaxPooling2D(pool_size=(2, 2)))
     # 卷积
-    # model.add(Conv2D(15, (3, 3), padding='valid', activation='relu'))  # 池化
-    model.add(Conv2D(12, (3, 3), padding='valid', activation='relu'))  # 池化
+    model.add(Conv2D(15, (3, 3), padding='valid', activation='tanh'))  # 池化
+    # model.add(Conv2D(12, (3, 3), padding='valid', activation='relu'))  # 池化
     model.add(MaxPooling2D(pool_size=(2, 2)))
     # 全连接，然后输出
     model.add(Flatten())
-    model.add(Dense(128, activation='relu'))
+    model.add(Dense(128, activation='tanh'))
     model.add(Dense(num_classes, activation='softmax'))  # Compile model
     model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['accuracy'])
     return model
@@ -95,7 +105,8 @@ def prec_ets(n_trees, X_train, y_train, X_test, y_test, random_state=None):
     clf = ExtraTreesClassifier(n_estimators=n_trees, max_depth=None, n_jobs=-1, verbose=1, random_state=random_state)
     clf.fit(X_train, y_train)
     y_pred = clf.predict(X_test)
-    prec = float(np.sum(y_pred == y_test)) / len(y_test)
+    print np.argmax(y_pred, axis=1)
+    prec = float(np.sum(np.argmax(y_pred, axis=1) == np.argmax(y_test, axis=1))) / len(y_test)
     return clf, y_pred, prec
 
 
@@ -111,7 +122,7 @@ def prec_rf(n_trees, X_train, y_train, X_test, y_test, random_state=None):
     clf = RandomForestClassifier(n_estimators=n_trees, max_depth=None, n_jobs=-1, verbose=1, random_state=random_state)
     clf.fit(X_train, y_train)
     y_pred = clf.predict(X_test)
-    prec = float(np.sum(y_pred == y_test)) / len(y_test)
+    prec = float(np.sum(np.argmax(y_pred, axis=1) == np.argmax(y_test, axis=1))) / len(y_test)
     return clf, y_pred, prec
 
 
@@ -119,11 +130,11 @@ def prec_rf(n_trees, X_train, y_train, X_test, y_test, random_state=None):
 # print "prec_rf", prec_rf(200, X_train, y_train, X_test, y_test, 0)[2]
 
 # build the model
-# X_train, y_train, X_test, y_test, num_classes = transform_data(X_train, y_train, X_test, y_test)
-# model = baseline_model()
+X_train, y_train, X_test, y_test, num_classes = transform_data(X_train, y_train, X_test, y_test)
+model = baseline_model()
 
 print X_train.shape
-model = baseline_model1()
+# model = baseline_model1()
 
 # Fit the model
 model.fit(X_train, y_train, validation_data=(X_test, y_test), epochs=10, batch_size=128, verbose=2)
